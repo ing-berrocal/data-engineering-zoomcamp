@@ -1,0 +1,22 @@
+id: 06_test
+namespace: zoomcamp.homework
+
+inputs: 
+  - id: file
+    type: JSON
+
+tasks:
+  - id: hello
+    type: io.kestra.plugin.core.log.Log
+    message: " {{ inputs.file }}"
+
+  - id: call_subflow
+    type: io.kestra.plugin.core.flow.Subflow
+    namespace: zoomcamp.homework
+    flowId: 02_postgres_taxi
+    inputs:
+      taxi: "{{ inputs.file['color_file'] }}"
+      month: "{{ inputs.file['month_file'] }}"
+      year: "{{ inputs.file['year_file'] }}"
+    wait: true
+    transmitFailed: true

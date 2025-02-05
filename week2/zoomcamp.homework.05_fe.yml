@@ -1,0 +1,42 @@
+id: 05_fe
+namespace: zoomcamp.homework
+
+tasks:
+  - id: read_data
+    type: io.kestra.plugin.jdbc.postgresql.Query
+    sql: SELECT color_file, year_file, month_file FROM public.download_file
+    fetchType: STORE
+          
+  - id: "log"
+    type: "io.kestra.plugin.core.log.Log"
+    message: Num de registros
+
+  - id: to_json
+    type: io.kestra.plugin.serdes.json.IonToJson
+    from: "{{ outputs.read_data.uri }}"
+
+  #- id: result
+  #  type: io.kestra.plugin.serdes.csv.IonToCsv
+  #  from: "{{ outputs.read_data.uri }}"
+  #  header: false
+
+  - id: each
+    type: io.kestra.plugin.core.flow.ForEachItem
+    items: '{{ outputs.to_json.uri }}'
+    batch:
+      rows: 1
+    namespace: zoomcamp.homework
+    flowId: 06_test
+    wait: true # wait for the subflow execution
+    transmitFailed: true # fail the task run if the subflow execution fails
+    inputs:
+      file: "{{ json(read(taskrun.items)) }}" # special variable that contains the items of the batch
+      #month: "{{ taskrun.items.month_file }}"
+      #year: "{{ taskrun.items.year_file }}"
+
+pluginDefaults:
+  - type: io.kestra.plugin.jdbc.postgresql
+    values:
+      url: jdbc:postgresql://host.docker.internal:5432/postgres-zoomcamp
+      username: kestra
+      password: k3str4
