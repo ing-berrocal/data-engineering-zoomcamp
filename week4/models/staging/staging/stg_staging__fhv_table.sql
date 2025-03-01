@@ -1,12 +1,9 @@
-with 
-
-source as (
+with fhv_table as (
 
     select * from {{ source('staging', 'fhv_table') }}
 
 ),
-
-renamed as (
+stg_fhv_table as (
 
     select
         dispatching_base_num,
@@ -17,8 +14,8 @@ renamed as (
         sr_flag,
         affiliated_base_number
 
-    from source
+    from fhv_table
 
 )
 
-select * from renamed
+select * from stg_fhv_table

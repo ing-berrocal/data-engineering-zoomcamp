@@ -9,3 +9,8 @@ sources:
       - name: green_table
       - name: yellow_table
       - name: fhv_table
+
+models:
+  - name: stg_staging__yellow_table
+  - name: stg_staging__green_table
+  - name: stg_staging__fhv_table
