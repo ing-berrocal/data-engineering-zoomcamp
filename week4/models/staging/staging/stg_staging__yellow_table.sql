@@ -1,4 +1,4 @@
-with yellow_table as (
+with s_yellow_table as (
 
     select *,
     row_number() over(partition by vendorid, tpep_pickup_datetime) as rn 
@@ -9,31 +9,7 @@ with yellow_table as (
 stg_yellow_table as (
 
     select
-        vendorid,
-        tpep_pickup_datetime,
-        tpep_dropoff_datetime,
-        passenger_count,
-        trip_distance,
-        ratecodeid,
-        store_and_fwd_flag,
-        pulocationid,
-        dolocationid,
-        payment_type,
-        fare_amount,
-        extra,
-        mta_tax,
-        tip_amount,
-        tolls_amount,
-        improvement_surcharge,
-        total_amount,
-        congestion_surcharge
-
-    from yellow_table
-
-)
-
-select 
--- identifiers
+         -- identifiers
     {{ dbt_utils.generate_surrogate_key(['vendorid', 'tpep_pickup_datetime']) }} as tripid,    
     {{ dbt.safe_cast("vendorid", api.Column.translate_type("integer")) }} as vendorid,
     {{ dbt.safe_cast("ratecodeid", api.Column.translate_type("integer")) }} as ratecodeid,
@@ -63,6 +39,9 @@ select
     coalesce({{ dbt.safe_cast("payment_type", api.Column.translate_type("integer")) }},0) as payment_type,
     {{ get_payment_type_description('payment_type') }} as payment_type_description
 
-    from stg_yellow_table
-where rn = 1
+    from s_yellow_table
+    where rn = 1
+)
 
+select *    
+from stg_yellow_table
